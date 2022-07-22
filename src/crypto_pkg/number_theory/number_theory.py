@@ -34,12 +34,10 @@ class NumberTheory:
         """
         if cls.gcd(a, n) != 1:
             raise CoPrimeException(f"{a} and {n} are not co-primes")
-        # Initialise r, u and v
         r_list = [a, n]
         u = [1, 0]
         v = [0, 1]
         while r_list[-1] != 0:
-            # Only store the latests two values of u,v and r's
             q = r_list[0] // r_list[1]
             u_value = u[0] - q * u[1]
             v_value = v[0] - q * v[1]
