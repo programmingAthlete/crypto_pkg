@@ -24,3 +24,4 @@ Make sure to have the followings installed in your system for the installation o
 - bzip2 
 - xz-utils 
 - libffi-dev
+- pari-gp
