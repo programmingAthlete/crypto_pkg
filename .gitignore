@@ -3,3 +3,5 @@ venv
 .pytest_cache
 .coverage
 src/crypto_pkg.egg-info
+
+notes.txt

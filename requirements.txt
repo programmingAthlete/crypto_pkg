@@ -1,0 +1,2 @@
+sage_conf>=9.6
+sagemath-standard>=9.6
