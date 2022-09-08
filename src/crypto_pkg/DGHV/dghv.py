@@ -88,7 +88,7 @@ class DGHV:
         :param number: list of numbers of Ascii characters
         :return: list of Ascii characters
         """
-        return [chr(item) for item in number]
+        return [chr(int(item)) for item in number]
 
     @classmethod
     def decrypt_full_message(cls, c: list, p: int) -> str:
