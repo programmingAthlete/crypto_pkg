@@ -99,6 +99,6 @@ class DGHV:
         :param p:
         :return: decrypted string message
         """
-        decrypted_bins = [[cls.decrypt(c=c_bit, p=p) for c_bit in encrypted_bits] for encrypted_bits in c]
+        decrypted_bins = [[cls.decrypt(c=int(c_bit), p=p) for c_bit in encrypted_bits] for encrypted_bits in c]
         decrypted_base_10 = [base_to_10(numb=item, base=2) for item in decrypted_bins]
         return ''.join(cls.ascii_numer_to_str(decrypted_base_10))
