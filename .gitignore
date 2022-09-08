@@ -5,3 +5,4 @@ venv
 src/crypto_pkg.egg-info
 
 notes.txt
+.python-version
