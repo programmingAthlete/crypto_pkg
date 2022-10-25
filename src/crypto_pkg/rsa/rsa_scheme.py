@@ -1,9 +1,13 @@
 from crypto_pkg.contracts.exceptions import KValueException, PrimeNotGeneratedException
 from crypto_pkg.contracts.prime_numbers import KBitPrimeResponse, GeneratePrimesResponse
 from crypto_pkg.contracts.rsa_scheme import GenerateKeyResponse
-from crypto_pkg.number_operations import exp_modular
+from crypto_pkg.number_operations import exp_modular, str_to_int, int_to_str
 from crypto_pkg.number_theory.number_theory import NumberTheory
 from crypto_pkg.number_theory.prime_numbers import PrimNumbers
+
+
+class MessageTooBigError(Exception):
+    """ Raised when the message is too big """
 
 
 class RSA:
@@ -50,6 +54,20 @@ class RSA:
             print(message)
             raise PrimeNotGeneratedException(message)
         return GeneratePrimesResponse(p=p, q=q)
+
+    @staticmethod
+    def encrypt_message(message: str, e: int, n: int):
+        m = str_to_int(message)
+        if m < 0 or m > n - 1:
+            raise MessageTooBigError
+        c = RSA.encrypt(m=m, e=e, n=n)
+        return int_to_str(c)
+
+    @staticmethod
+    def decrypt_message(cipher_text: str, d: int, n: int):
+        c = str_to_int(cipher_text)
+        m = RSA.decrypt(c=c, d=e, n=n)
+        return int_to_str(m)
 
     @staticmethod
     def encrypt(m, e, n):
