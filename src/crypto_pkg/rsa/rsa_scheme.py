@@ -60,14 +60,12 @@ class RSA:
         m = str_to_int(message)
         if m < 0 or m > n - 1:
             raise MessageTooBigError
-        c = RSA.encrypt(m=m, e=e, n=n)
-        return int_to_str(int(c))
+        return RSA.encrypt(m=m, e=e, n=n)
 
     @staticmethod
-    def decrypt_message(cipher_text: str, d: int, n: int):
-        c = str_to_int(cipher_text)
-        m = RSA.decrypt(c=c, d=d, n=n)
-        return int_to_str(int(m))
+    def decrypt_message(cipher_text: int, d: int, n: int):
+        m = RSA.decrypt(c=cipher_text, d=d, n=n)
+        return int_to_str(m)
 
     @staticmethod
     def encrypt(m, e, n):
