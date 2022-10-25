@@ -61,7 +61,7 @@ class RSA:
         if m < 0 or m > n - 1:
             raise MessageTooBigError
         c = RSA.encrypt(m=m, e=e, n=n)
-        return int_to_str(c)
+        return int_to_str(int(c))
 
     @staticmethod
     def decrypt_message(cipher_text: str, d: int, n: int):
