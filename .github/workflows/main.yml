@@ -31,6 +31,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.version.output.PK_VERSION }}
+          tag_name: ${{ steps.version.outputs.PKG_VERSION }}
           draft: false
           prerelease: false
