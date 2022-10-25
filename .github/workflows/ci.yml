@@ -24,7 +24,7 @@ jobs:
   cd:
     name: Continuous Delivery
     needs: ci
-    run-on: ubuntu-22.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout the source code
         uses: actions/checkout@v3
