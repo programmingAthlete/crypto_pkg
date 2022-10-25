@@ -1,3 +1,6 @@
+import math
+
+
 def int_2_base(a: int, base: int) -> list:
     """
     Convert integer to base "base"
@@ -46,3 +49,12 @@ def base_to_10(numb: [int], base: int) -> int:
     for i in range(len(numb)):
         base_10 += numb[::-1][i] * base ** i
     return base_10
+
+
+def str_to_int(s: str) -> int:
+    return int.from_bytes(s.encode(), byteorder='little')
+
+
+def int_to_str(i: int) -> str:
+    length = math.ceil(i.bit_length() / 8)
+    return i.to_bytes(length, byteorder='little').decode()
