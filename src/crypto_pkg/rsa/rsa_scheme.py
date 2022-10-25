@@ -67,7 +67,7 @@ class RSA:
     def decrypt_message(cipher_text: str, d: int, n: int):
         c = str_to_int(cipher_text)
         m = RSA.decrypt(c=c, d=d, n=n)
-        return int_to_str(m)
+        return int_to_str(int(m))
 
     @staticmethod
     def encrypt(m, e, n):
