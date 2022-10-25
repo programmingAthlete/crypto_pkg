@@ -38,7 +38,7 @@ jobs:
       - name: Setup Version
         id: version
         run: |
-          echo "::set-output name=PKG_VERSION::$(pip show crypto_pkg | grep Version | sed 's/Version://g' | seed 's/ //g')"
+          echo "::set-output name=PKG_VERSION::$(pip show crypto_pkg | grep Version | sed 's/Version://g' | sed 's/ //g')"
       - name: Get Short Sha
         id: sha
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
