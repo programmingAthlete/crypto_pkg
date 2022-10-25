@@ -21,3 +21,33 @@ jobs:
       - name: Run Coverage
         run: |
           make coverage
+  cd:
+    name: Continuous Delivery
+    needs: ci
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@v3
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install package
+        run: |
+          pip install -e .
+      - name: Setup Version
+        id: version
+        run: |
+          echo "::set-output name=PKG_VERSION::$(pip show crypto_pkg | grep Version | sed 's/Version://g' | sed 's/ //g')"
+      - name: Get Short Sha
+        id: sha
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Create Pre-Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.PKG_VERSION }}-${{ steps.sha.outputs.sha_short }}
+          draft: false
+          prerelease: true
