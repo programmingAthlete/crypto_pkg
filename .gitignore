@@ -8,6 +8,8 @@ src/crypto_pkg/contracts/__pycache__/
 src/crypto_pkg/number_theory/__pycache__/
 src/crypto_pkg/ciphers/asymmetric/rsa/__pycache__/
 tests/__pycache__/
+**/__pycache__/
+
 
 
 
