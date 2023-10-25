@@ -20,9 +20,10 @@ class DoubleAESAttack:
         return Text(text=plain_text)
 
     @classmethod
-    def lookup_table_computation(cls, plain_text: str) -> Dict[int, int]:
+    def lookup_table_computation(cls, plain_text: str, max_key: int = 24) -> Dict[int, int]:
         p = Text(text=bytes.fromhex(plain_text))
-        out = {cls.encrypt(key=prepare_key(i), plain_text=p).integer: i for i in range(1, 2 ** 24)}
+        out = {cls.encrypt(key=prepare_key(key=i, max_key=max_key), plain_text=p).integer: i for i in
+               range(1, 2 ** max_key)}
         return out
 
     @classmethod
@@ -36,9 +37,8 @@ class DoubleAESAttack:
                 return prepare_key(lookup_table.get(m.integer)), key
 
     @classmethod
-    def attack(cls, plain_text: str, cipher_text: str):
-
-        look_up_table = cls.lookup_table_computation(plain_text=plain_text)
+    def attack(cls, plain_text: str, cipher_text: str, max_key: int = 24):
+        look_up_table = cls.lookup_table_computation(plain_text=plain_text, max_key=max_key)
         keys = cls.search_match(cipher_text=cipher_text, lookup_table=look_up_table)
         return keys
 
@@ -47,9 +47,15 @@ if __name__ == '__main__':
 
     ''' Example '''
 
+    # Suppose that the key is made of 24bits unknown bits followed by all zero bits
     pt = '2355502c48059b15f70ddf4938b3b97e'
     ct = '5d64800bce91edda9c3bad2956be5b12'
-    ks = DoubleAESAttack.attack(plain_text=pt, cipher_text=ct)
+    print(f'known plain text: {pt}')
+    print(f'corresponding cipher text: {ct}')
+
+    print("\nStating the attack")
+    print("It might take a bit, but don't worry we'll find it")
+    ks = DoubleAESAttack.attack(plain_text=pt, cipher_text=ct, max_key=24)
     if ks:
         print("\nKeys found:")
         print(f"\tk1: 0x{ks[0].hex}")
