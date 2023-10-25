@@ -1,7 +1,7 @@
 import unittest
 import random
 
-from crypto_pkg.DGHV.dghv import DGHV
+from crypto_pkg.ciphers.asymmetric.DGHV.dghv import DGHV
 
 
 class TestDGHVScheme(unittest.TestCase):

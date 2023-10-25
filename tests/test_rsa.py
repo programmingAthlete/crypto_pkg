@@ -1,6 +1,6 @@
 import unittest
 
-from crypto_pkg.rsa.rsa_scheme import RSA
+from crypto_pkg.ciphers.asymmetric import RSA
 
 
 class TestRSA(unittest.TestCase):
