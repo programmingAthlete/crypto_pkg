@@ -38,7 +38,6 @@ class LFSR:
     def __str__(self):
         output = ""
         for i in reversed(range(0, self.n)):
-            # reversed because we print S_0 to the right
             output += str(self.state[i])
         return output
 

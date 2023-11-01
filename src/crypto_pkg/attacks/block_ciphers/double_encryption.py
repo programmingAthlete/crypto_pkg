@@ -1,3 +1,5 @@
+import random
+import sys
 from typing import Dict, Tuple, Union
 
 from Crypto.Cipher import AES
@@ -47,9 +49,25 @@ if __name__ == '__main__':
 
     ''' Example '''
 
+    # ---- Generate a plain text - cipher text pair
+    # Generate keys
+    k1 = prepare_key(random.getrandbits(24))
+    k2 = prepare_key(random.getrandbits(24))
+
+    # Generate random plain text
+    pt = format(random.getrandbits(128), 'x')
+
+    cipher1 = AES.new(k1.ascii_hex, AES.MODE_ECB)
+    c1 = cipher1.encrypt(bytes.fromhex(pt))
+    cipher2 = AES.new(k2.ascii_hex, AES.MODE_ECB)
+    c2 = cipher2.encrypt(c1)
+    print(f"Key k1: {k1.hex}")
+    print(f"Key k2: {k2.hex}")
+
+    print("The attack will find back these keys")
+
     # Suppose that the key is made of 24bits unknown bits followed by all zero bits
-    pt = '2355502c48059b15f70ddf4938b3b97e'
-    ct = '5d64800bce91edda9c3bad2956be5b12'
+    ct = c2.hex()
     print(f'known plain text: {pt}')
     print(f'corresponding cipher text: {ct}')
 
