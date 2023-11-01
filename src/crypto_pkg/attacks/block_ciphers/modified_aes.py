@@ -1,4 +1,5 @@
 import logging
+from enum import Enum
 from logging import getLogger
 from multiprocessing import Pool
 import random
@@ -6,10 +7,10 @@ import random
 from crypto_pkg.attacks.block_ciphers.utils import prepare_key
 from crypto_pkg.ciphers.symmetric.aes import CustomAES, array_to_matrix, get_array_from_state
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.CRITICAL)
 
 _log = getLogger(__name__)
-_log.setLevel(logging.DEBUG)
+_log.setLevel(logging.CRITICAL)
 
 
 class ModifiedAES(CustomAES):
@@ -49,9 +50,13 @@ class ModifiedAES(CustomAES):
                 _log.info(f"key guess for block {section_n}: {key.hex}")
                 return key
 
-    def attack(self, plain_text: str, cipher_text: str):
-        p_int_list = [int(item, 16) for item in [plain_text[i * 2:i * 2 + 2] for i in range(len(plain_text))] if item != '']
-        c_int_list = [int(item, 16) for item in [cipher_text[i * 2:i * 2 + 2] for i in range(len(cipher_text))] if item != '']
+    def attack(self, plain_text: str, cipher_text: str, verbose: bool = False):
+        if verbose:
+            _log.setLevel(logging.DEBUG)
+        p_int_list = [int(item, 16) for item in [plain_text[i * 2:i * 2 + 2] for i in range(len(plain_text))] if
+                      item != '']
+        c_int_list = [int(item, 16) for item in [cipher_text[i * 2:i * 2 + 2] for i in range(len(cipher_text))] if
+                      item != '']
 
         c_by_block_ref = [c_int_list[i * 4:i * 4 + 4] for i in range(len(c))]
         args = (
@@ -90,6 +95,6 @@ if __name__ == '__main__':
     # ---- Run the attack
     _log.debug(f"Run the attack with plain-text {p} and cipher-text {p}")
     aes = ModifiedAES()
-    result = aes.attack(plain_text=pt, cipher_text=ct)
+    result = aes.attack(plain_text=pt, cipher_text=ct, verbose=True)
     assert result == int(to_find_key, 16)
     print(f"\nSuccess: key {to_find_key} recovered")
