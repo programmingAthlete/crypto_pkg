@@ -177,7 +177,6 @@ class Attack:
             log.debug(f"[Process {byte_position}] Current predicted for all keys")
             log.info(f"[Process {byte_position}] Calculating Correlation matrix C")
             c = self.computeC(save=store, byte_position=byte_position, predicted_currents=predicted_current_keys)
-        plot_c(data=c, plot=plot, byte_position=byte_position)
         log.info(f"[Process {byte_position}] Process {byte_position} finished")
         return byte_position, np.unravel_index(np.argmax(c), c.shape)[0]
 
