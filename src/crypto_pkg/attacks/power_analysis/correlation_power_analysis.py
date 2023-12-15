@@ -2,11 +2,13 @@ import argparse
 import logging
 import multiprocessing
 import os
+import sys
 import time
 from multiprocessing import Pool
 from typing import Tuple, List
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
 
 from crypto_pkg.ciphers.symmetric.aes import sbox_table
 
@@ -15,6 +17,25 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 log.setLevel(logging.INFO)
+
+
+def plot_c(data: np.ndarray, byte_position: int, plot: bool = False) -> None:
+    """
+    Plot and save the correlation matrix results for the byte position 'byte_position'
+
+    Args:
+        data: correlation matrix C
+        byte_position: byte position corresponding to the entries of C
+        plot: show the plot or not - default = false
+    """
+    log.debug(f"[Process {byte_position}] Generating the plot for the byte in position {byte_position}")
+    x = np.arange(len(data[0]))
+    for row in data:
+        plt.plot(x, row)
+    if plot:
+        plt.show()
+    plt.title(f"Correlation plot of the {byte_position + 1}th position key byte")
+    plt.savefig(f'plots/plot_{byte_position}.png')
 
 
 def to_hex(n, size=16):
@@ -156,6 +177,7 @@ class Attack:
             log.debug(f"[Process {byte_position}] Current predicted for all keys")
             log.info(f"[Process {byte_position}] Calculating Correlation matrix C")
             c = self.computeC(save=store, byte_position=byte_position, predicted_currents=predicted_current_keys)
+        plot_c(data=c, plot=plot, byte_position=byte_position)
         log.info(f"[Process {byte_position}] Process {byte_position} finished")
         return byte_position, np.unravel_index(np.argmax(c), c.shape)[0]
 
@@ -245,9 +267,15 @@ if __name__ == '__main__':
                              ' the provided byte position')
 
     parser.set_defaults(store_correlation_matrices=False, re_calculate_correlation_matrices=False,
-                        show_plot_correlations=False, filename="group4.pickle", verbose=False, max_datapoint=4000,
+                        show_plot_correlations=False,
+                        filename="src/crypto_pkg/attacks/power_analysis/test_file_name.pickle",
+                        verbose=False, max_datapoint=4000,
                         byte_position=None)
     args = parser.parse_args()
     if args.verbose:
         log.setLevel(logging.DEBUG)
+    print(os.getcwd())
+    print(os.path.dirname(os.path.abspath(__file__)))
+    if os.getcwd() != os.path.dirname(os.path.abspath(__file__)):
+        raise Exception(f"Run this script from the directory {os.path.dirname(os.path.abspath(__file__))}")
     full_attack(arguments=args)
