@@ -1,8 +1,12 @@
 import logging
 import os
+import time
+from multiprocessing import Pool
 from typing import Tuple, List
 import numpy as np
 import pickle
+
+from crypto_pkg.ciphers.symmetric.aes import sbox_table
 
 logging.basicConfig(level=logging.INFO)
 
@@ -64,7 +68,7 @@ class Attack:
         Returns:
             Hamming wight of SBOX(keyByte \oplus plainTextByte)
         """
-        return bin(SBOX[keyByte ^ plaintextByte])[2:].count('1')
+        return bin(sbox_table[keyByte ^ plaintextByte])[2:].count('1')
 
     @staticmethod
     def calculatePearsonCoefficient(x: np.ndarray, y: np.ndarray) -> float:
@@ -150,7 +154,6 @@ class Attack:
             log.debug(f"[Process {byte_position}] Current predicted for all keys")
             log.info(f"[Process {byte_position}] Calculating Correlation matrix C")
             c = self.computeC(save=store, byte_position=byte_position, predicted_currents=predicted_current_keys)
-        plot_c(data=c, plot=plot, byte_position=byte_position)
         log.info(f"[Process {byte_position}] Process {byte_position} finished")
         return byte_position, np.unravel_index(np.argmax(c), c.shape)[0]
 
@@ -159,3 +162,23 @@ if __name__ == '__main__':
     filename = "test_file_name.pickle"
     # Run the full correlation attack
     attack = Attack(data_filename=filename, max_datapoints=400)
+    args_to_processes = tuple(
+        [[i, False, False, True] for i
+         in range(16)])
+
+    log.info("Starting the multiprocessing attack")
+    ti = time.time()
+    with Pool() as pool:
+        results = pool.starmap(attack.attack_byte, args_to_processes)
+    tf = time.time()
+    print()
+    log.info(
+        f"All processes finished. Final output: {results}. Execution time: {tf - ti} seconds -"
+        f" {(tf - ti) / 60} minutes")
+    log.debug(f"Constructing the final key from the output")
+    out = [(pos, hex(item)[2:]) for (pos, item) in results]
+    sorted_list = sorted(out, key=lambda x: x[0])
+    key_list = [item[1] for item in sorted_list][::-1]
+    key = ''.join(key_list)
+    print(f"\nKey Found")
+    print(key)
