@@ -19,5 +19,8 @@ setup(
     packages=find_packages(where="src", exclude=["*tests*"]),
     install_requires=requirements,
     author="programmingAthlete",
-    zip_safe=True
+    zip_safe=True,
+    console_scripts={
+        "crypto":"crypto.entry_point:main"
+    }
 )

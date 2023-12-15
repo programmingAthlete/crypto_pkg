@@ -58,7 +58,7 @@ class ModifiedAES(CustomAES):
         c_int_list = [int(item, 16) for item in [cipher_text[i * 2:i * 2 + 2] for i in range(len(cipher_text))] if
                       item != '']
 
-        c_by_block_ref = [c_int_list[i * 4:i * 4 + 4] for i in range(len(c))]
+        c_by_block_ref = [c_int_list[i * 4:i * 4 + 4] for i in range(len(c_int_list))]
         args = (
             [p_int_list, c_by_block_ref, 32, 0],
             [p_int_list, c_by_block_ref, 64, 1],
@@ -69,8 +69,8 @@ class ModifiedAES(CustomAES):
         _log.debug("Run attack on sub-blocks in parallel")
         with Pool() as pool:
             res = pool.starmap(self.attack_section, args)
-        _log.debug(f"Parallel execution terminated with keys guesses {res}")
         r = [int(item.hex, 16) for item in res]
+        _log.debug(f"Parallel execution terminated with keys guesses {r}")
         out = r[0] ^ r[1] ^ r[2] ^ r[3]
         _log.info(f"128bits key guess: {out}")
         return out
