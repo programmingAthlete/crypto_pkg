@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import time
 from decimal import Decimal
@@ -169,9 +170,10 @@ def attack_double_encryption(
 
 @app.command("correlation-power-analysis")
 def attack_correlation_power_analysis(
-        filename: str = typer.Argument(str, help="Filename of the pickle file with the measurements"),
+        filename: str = typer.Argument('src/crypto_pkg/attacks/power_analysis/test_file_name.pickle',
+                                       help="Filename of the pickle file with the measurements"),
         max_datapoints: Optional[int] = typer.Option(400, help="Maximum number of data points to consider"),
-        byte_position: Optional[int] = typer.Option(None, help="Byte position to attack"),
+        byte_position: Optional[int] = typer.Option(None, help="Byte position to attack")
 ):
     """
     Example on how to use the power correlation attack.\n
@@ -193,7 +195,8 @@ def attack_correlation_power_analysis(
                                       re_calculate=True)
         print(f"Key byte found: {hex(key_byte[1])[2:]}")
         return
-
+    cores = multiprocessing.cpu_count()
+    print(f"Number of cores: {cores}. The program wil run in chunks of {cores} byte positions")
     # Run the full correlation attack
     args_to_processes = tuple(
         [[i, False, False, True] for i

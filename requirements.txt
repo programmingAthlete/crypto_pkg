@@ -1,3 +1,5 @@
 pycryptodome==3.19.0
 typer[all]
 pydantic<2
+numpy==1.24.2
+matplotlib==3.7.1
