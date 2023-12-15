@@ -34,5 +34,16 @@ Usage examples are provided in the attacks source code files
 <li>attacks/power_analysis/correlation_power_analysis.py</li>
 </ul>
 
+### From CLI
+<code>pip install -e .</code>
+
+<code>crypto attacks modifiedAES --help</code>
+
+<code>crypto attacks geffe --help</code>
+
+<code>crypto attacks AES-double-encryption --help</code>
+
+<code>crypto attacks correlation-power-analysis --help</code>
+
 ## Usage
 The <i>Textbook RSA</i> and the <i>DGVH</i> PKEs are used in the [BruteSniffing_Fisher](https://github.com/programmingAthlete/BruteSniffing_Fisher) repository.

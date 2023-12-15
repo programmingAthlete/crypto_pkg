@@ -1,4 +1,6 @@
+import argparse
 import logging
+import multiprocessing
 import os
 import time
 from multiprocessing import Pool
@@ -158,13 +160,43 @@ class Attack:
         return byte_position, np.unravel_index(np.argmax(c), c.shape)[0]
 
 
-if __name__ == '__main__':
-    filename = "test_file_name.pickle"
-    # Run the full correlation attack
-    attack = Attack(data_filename=filename, max_datapoints=400)
+def full_attack(arguments):
+    log.debug("Checking the existence of 'matrices' and 'plot' sub-directories")
+    must_have_dirs = ["matrices", "plots"]
+    if not os.path.exists(arguments.filename):
+        log.error(f"File {arguments.filename} does not exist")
+        raise Exception(f"File {arguments.filename} does not exist")
+    for item in must_have_dirs:
+        if not os.path.exists(item):
+            log.warning(f"Directory {item} not found -> creating it")
+            os.makedirs(item)
+        else:
+            log.debug(f"Directory {item} found -> all good")
+
+    print("\nArguments provided")
+    args_attr = arguments.__dict__
+    for arg in args_attr:
+        print(f"\t{arg} -> {args_attr[arg]}")
+    print("\n")
+
+    attack = Attack(data_filename=arguments.filename, max_datapoints=arguments.max_datapoint)
+    if args.byte_position is not None:
+        key_byte = attack.attack_byte(byte_position=arguments.byte_position, plot=arguments.show_plot_correlations,
+                                      store=arguments.store_correlation_matrices,
+                                      re_calculate=arguments.re_calculate_correlation_matrices)
+        print(f"Key byte found: {hex(key_byte[1])[2:]}")
+        return
+
+    cores = multiprocessing.cpu_count()
+    log.info(f"Number of cores: {cores}. The program wil run in chunks of {cores} byte positions")
+    print()
+
     args_to_processes = tuple(
-        [[i, False, False, True] for i
+        [[i, arguments.show_plot_correlations, arguments.store_correlation_matrices,
+          arguments.re_calculate_correlation_matrices] for i
          in range(16)])
+    log.debug(f"Arguments to the process {args_to_processes}")
+    print()
 
     log.info("Starting the multiprocessing attack")
     ti = time.time()
@@ -182,3 +214,40 @@ if __name__ == '__main__':
     key = ''.join(key_list)
     print(f"\nKey Found")
     print(key)
+    return
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        prog='CorrelationPowerAttack',
+        description='Find encryption key via correlation power analysis attack')
+    parser.add_argument('-f', '--filename', help="Filename of teh pickle file from where to read the traces", type=str)
+    parser.add_argument('-s', '--store_correlation_matrices', help='Store the correlation matrices in a .npy file to '
+                                                                   'avoid having to re-ccalculated it at each'
+                                                                   ' execution',
+                        action='store_true')
+    parser.add_argument('--no-store_correlation_matrices', dest='store_correlation_matrices', action='store_false')
+    parser.add_argument('-r', '--re_calculate_correlation_matrices', help='Recalculate the correlation matrix',
+                        action='store_true')
+    parser.add_argument('--no-re_calculate_correlation_matrices', dest='re_calculate_correlation_matrices',
+                        action='store_false')
+    parser.add_argument('-p', '--show_plot_correlations', help='Show correlation plots - default=False',
+                        action='store_true')
+    parser.add_argument('--no-show_plot_correlations', dest='show_plot_correlations',
+                        action='store_false')
+    parser.add_argument('-v', '--verbose', help='Show debug logs', action='store_true')
+    parser.add_argument('--no-verbose', help='Show debug logs', action='store_false', dest='verbose')
+    parser.add_argument('-l', '--max_datapoint', help='Maximum number of data points to consider - default=3000',
+                        type=int)
+    parser.add_argument('-b', '--byte_position', type=int,
+                        help='Provide the byte position that you want to attack. If this '
+                             'argument is provided, the program will only runt he attack for'
+                             ' the provided byte position')
+
+    parser.set_defaults(store_correlation_matrices=False, re_calculate_correlation_matrices=False,
+                        show_plot_correlations=False, filename="group4.pickle", verbose=False, max_datapoint=4000,
+                        byte_position=None)
+    args = parser.parse_args()
+    if args.verbose:
+        log.setLevel(logging.DEBUG)
+    full_attack(arguments=args)

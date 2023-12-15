@@ -47,7 +47,10 @@ class DoubleAESAttack:
 
 if __name__ == '__main__':
 
-    ''' Example '''
+    ''' Example\n
+     IMPORTANT NOTICE: faisable with general keys, it still has a complexitx of 2^128.
+    In this attack it is assumed that the keys are made of 24bits unknown bits followed by all zero bits.
+    '''
 
     # ---- Generate a plain text - cipher text pair
     # Generate keys

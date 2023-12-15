@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "1.3.1"
+__version__ = "1.4.0"
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -19,5 +19,8 @@ setup(
     packages=find_packages(where="src", exclude=["*tests*"]),
     install_requires=requirements,
     author="programmingAthlete",
-    zip_safe=True
+    zip_safe=True,
+    console_scripts={
+        "crypto":"crypto.entry_point:main"
+    }
 )
