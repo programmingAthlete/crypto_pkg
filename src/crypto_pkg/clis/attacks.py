@@ -195,25 +195,7 @@ def attack_correlation_power_analysis(
                                       re_calculate=True)
         print(f"Key byte found: {hex(key_byte[1])[2:]}")
         return
-    cores = multiprocessing.cpu_count()
-    print(f"Number of cores: {cores}. The program wil run in chunks of {cores} byte positions")
-    # Run the full correlation attack
-    args_to_processes = tuple(
-        [[i, False, False, True] for i
-         in range(16)])
-
-    print("Starting the multiprocessing attack")
-    ti = time.time()
-    with Pool() as pool:
-        results = pool.starmap(attack.attack_byte, args_to_processes)
-    tf = time.time()
-    print(
-        f"\nAll processes finished. Final output: {results}. Execution time: {tf - ti} seconds -"
-        f" {(tf - ti) / 60} minutes")
-    print(f"Constructing the final key from the output")
-    out = [(pos, hex(item)[2:]) for (pos, item) in results]
-    sorted_list = sorted(out, key=lambda x: x[0])
-    key_list = [item[1] for item in sorted_list][::-1]
-    key = ''.join(key_list)
-    print(f"\nKey Found")
+    key = attack.attack_full_key(store_correlation_matrices=False, re_calculate_correlation_matrices=False,
+                                 show_plot_correlations=False)
+    print("Key Found")
     print(key)
