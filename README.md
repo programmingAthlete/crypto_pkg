@@ -44,6 +44,3 @@ Usage examples are provided in the attacks source code files
 <code>crypto attacks AES-double-encryption --help</code>
 
 <code>crypto attacks correlation-power-analysis --help</code>
-
-## Usage
-The <i>Textbook RSA</i> and the <i>DGVH</i> PKEs are used in the [BruteSniffing_Fisher](https://github.com/programmingAthlete/BruteSniffing_Fisher) repository.
