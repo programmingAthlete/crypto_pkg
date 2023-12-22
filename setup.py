@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "1.4.3"
+__version__ = "1.4.4"
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -17,10 +17,14 @@ setup(
     version=__version__,
     package_dir={"": "src"},
     packages=find_packages(where="src", exclude=["*tests*"]),
+    package_data={
+        'crypto_pkg': ['attacks/power_analysis/test_file.pickle'],
+    },
     install_requires=requirements,
     author="programmingAthlete",
+    author_email="luca.bonamino@hotmail.com",
     zip_safe=True,
     console_scripts={
-        "crypto":"crypto.entry_point:main"
+        "crypto": "crypto.entry_point:main"
     }
 )

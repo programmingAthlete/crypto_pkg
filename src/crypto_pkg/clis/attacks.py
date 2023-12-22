@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import pickle
 import time
 from decimal import Decimal
 import random
@@ -15,6 +16,8 @@ from crypto_pkg.attacks.block_ciphers.utils import prepare_key
 from crypto_pkg.attacks.power_analysis.correlation_power_analysis import Attack as PowerAnalysisAttack
 from crypto_pkg.attacks.stream_ciphers.geffe_cipher import Attack as GeffeAttack, ThresholdsOperator
 from crypto_pkg.contracts.cli_dto import ModifiedAESIn
+from importlib import resources
+import io
 
 app = typer.Typer(pretty_exceptions_show_locals=False, no_args_is_help=True)
 
@@ -170,7 +173,7 @@ def attack_double_encryption(
 
 @app.command("correlation-power-analysis")
 def attack_correlation_power_analysis(
-        filename: str = typer.Argument('src/crypto_pkg/attacks/power_analysis/test_file_name.pickle',
+        filename: str = typer.Argument('test_file.pickle',
                                        help="Filename of the pickle file with the measurements"),
         max_datapoints: Optional[int] = typer.Option(400, help="Maximum number of data points to consider"),
         byte_position: Optional[int] = typer.Option(None, help="Byte position to attack")
@@ -181,7 +184,11 @@ def attack_correlation_power_analysis(
      datapoints\n
     If a byte position is provided, only the provided key byte will be attacked, otherwise the whole key will be.
     """
+    with resources.open_binary('crypto_pkg.attacks.power_analysis', 'test_file.pickle') as file:
+        content = file.read()
 
+    with open(filename, 'wb') as f:
+        f.write(content)
     if not os.path.exists(filename):
         msg = f"File {filename} does not exist"
         print(msg)
@@ -199,3 +206,4 @@ def attack_correlation_power_analysis(
                                  show_plot_correlations=False)
     print("Key Found")
     print(key)
+    os.remove(filename)
