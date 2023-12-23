@@ -10,7 +10,7 @@ import pickle
 import matplotlib.pyplot as plt
 
 from crypto_pkg.ciphers.symmetric.aes import sbox_table
-from crypto_pkg.utils.logging import get_logger
+from crypto_pkg.utils.logging import get_logger, set_level
 
 log = get_logger(__name__)
 
@@ -178,8 +178,9 @@ class Attack:
         log.info(f"[Process {byte_position}] Process {byte_position} finished")
         return byte_position, np.unravel_index(np.argmax(c), c.shape)[0]
 
+    @set_level(logger=log)
     def attack_full_key(self, show_plot_correlations: bool = False, store_correlation_matrices: bool = False,
-                        re_calculate_correlation_matrices: bool = True):
+                        re_calculate_correlation_matrices: bool = True, verbose: bool = False):
         cores = multiprocessing.cpu_count()
         log.info(f"Number of cores: {cores}. The program wil run in chunks of {cores} byte positions\n")
 

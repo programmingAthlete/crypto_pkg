@@ -203,7 +203,7 @@ def attack_correlation_power_analysis(
         print(f"Key byte found: {hex(key_byte[1])[2:]}")
         return
     key = attack.attack_full_key(store_correlation_matrices=False, re_calculate_correlation_matrices=False,
-                                 show_plot_correlations=False)
+                                 show_plot_correlations=False, verbose=True)
     print("Key Found")
     print(key)
     os.remove(filename)

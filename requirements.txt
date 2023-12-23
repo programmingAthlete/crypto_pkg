@@ -1,5 +1,5 @@
-pycryptodome==3.19.0
+pycryptodome>=3.19.0
 typer[all]
-pydantic<2
-numpy==1.24.2
-matplotlib==3.7.1
+pydantic>=1.8,<2
+numpy>=1.24.2
+matplotlib>=3.7.1
