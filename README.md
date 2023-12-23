@@ -2,6 +2,15 @@
 
 Package containing symmetric and asymmetric key ciphers and attacks
 
+## Installation
+<code>pip install crypto-pkg</code>
+
+### Cloned repo
+If Installation is done via the GitHub cloned repository
+
+<code>make setup</code>
+
+
 ## Ciphers 
 <ul>
 <li>Asymmetric Key (PKE)</li>
@@ -35,7 +44,6 @@ Usage examples are provided in the attacks source code files
 </ul>
 
 ### From CLI
-<code>pip install -e .</code>
 
 <code>crypto attacks modifiedAES --help</code>
 
