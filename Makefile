@@ -1,33 +1,34 @@
 PROJECT_NAME = crypto_pkg
 
-PYTHON = python
+SHELL_DOT = $(shell printf "\033[34;1m▶\033[0m")
 
 .PHONY: tests
-tests:  $(info $(M) testing package...)
-	pip install -e . > /dev/null && pip install pytest > /dev/null
-	python -m pytest tests
+tests: $(info $(SHELL_DOT) testing package...)
+	@pip install -e . > /dev/null && pip install pytest > /dev/null
+	@python -m pytest tests
 
 .PHONY: coverage
-coverage: $(info $(M) coverage testing package...)  ## test coverage package
+coverage: $(info $(SHELL_DOT) coverage testing package...)
 	pip install -e . > /dev/null && pip install pytest pytest-cov > /dev/null
 	python -m pytest tests --cov=$(PROJECT_NAME) --cov-fail-under=0
 
 .PHONY: deps
-deps: $(info $(M) install required packages...)
+deps: $(info $(SHELL_DOT) install required packages...)
 	pip install -r requirements.txt
 
 .PHONY: setup
-deps: $(info $(M) install required packages...)
+setup: $(info $(SHELL_DOT) Install packge)
 	pip install -e .
 
 .PHONY: build
-build: $(info $(M) install required packages...)
+build: $(info $(SHELL_DOT) build package)
+	rm -rf dist
 	python -m build
 
 .PHONY: publishtest
-publishtest: $(info $(M) install required packages...)
+publishtest: $(info $(SHELL_DOT) Publish package to test PyPI)
 	python -m twine upload --repository testpypi dist/*
 
 .PHONY: publish
-publish: $(info $(M) install required packages...)
+publish: $(info $(SHELL_DOT) Publish package to PyPI)
 	python -m twine upload dist/*
