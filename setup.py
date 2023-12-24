@@ -26,5 +26,10 @@ setup(
     zip_safe=True,
     console_scripts={
         "crypto": "crypto.entry_point:main"
-    }
+    },
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ]
 )
