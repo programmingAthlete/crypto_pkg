@@ -1,8 +1,11 @@
 from decimal import Decimal
 from enum import Enum
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 
 from crypto_pkg.ciphers.symmetric.geffe import Geffe
+from crypto_pkg.utils.logging import get_logger, set_level
+
+log = get_logger()
 
 
 def int_2_base_2(k, n):
@@ -52,7 +55,7 @@ class Attack:
         self.max_clock = max_clock
 
     @staticmethod
-    def check_match(a1, a2):
+    def check_match(a1, a2) -> Decimal:
         match = [1 for i in range(len(a1)) if a1[i] == a2[i]]
         return Decimal(sum(match)) / Decimal(len(a1))
 
@@ -92,7 +95,7 @@ class Attack:
 
         return key0, key2
 
-    def find_k1(self, key0, key2):
+    def find_k1(self, key0, key2) -> Dict[str, list]:
         g = Geffe(self.n, self.all_taps, self.f)
         all_keys = [[k0_item, k1, k2_item] for k0_item in key0 for k1 in range(self.max_iter) for k2_item in
                     key2]
@@ -101,19 +104,25 @@ class Attack:
         success = [item[1] for item in res if item[0] is True]
         if success:
             result = success[0]
-            return f"\nSuccess\nThe key is (k0,k1,k2) = {int_2_base_2(result[0], self.n)}," \
-                   f"{int_2_base_2(result[1], self.n)}," \
-                   f"{int_2_base_2(result[2], self.n)}"
+            return {"k0": int_2_base_2(result[0], self.n),
+                    "k1": int_2_base_2(result[1], self.n),
+                    "k2": int_2_base_2(result[2], self.n)
+                    }
         else:
-            return "\nFail"
+            raise Exception("Attack Failed")
 
-    def attack(self, thresholds):
+    @set_level(log)
+    def attack(self, thresholds, _verbose: bool = False):
+        log.info("Search for possible seeds")
         k0, k2 = self.look_for_correlation(thresholds=thresholds)
-        print("Possible choices")
-        print(f"\tk_0 = {k0} = {[int_2_base_2(item, 16) for item in k0]}")
-        print(f"\tk_2 = {k2} = {[int_2_base_2(item, 16) for item in k2]}")
+        log.info("Possible choices for seeds of LFSR 1 and 3")
+        msg = f"Possible choices\n\tk_0 = {k0} = {[int_2_base_2(item, 16) for item in k0]}\n" \
+              f"\tk_2 = {k2} = {[int_2_base_2(item, 16) for item in k2]}"
+        log.debug(msg)
+        log.info("Find seed for LFSR 2")
         out = self.find_k1(key0=k0, key2=k2)
-        print(out)
+        msg = f"\nSuccess\nThe key is (k0,k1,k2)\n\t = {out['k0']},{out['k1']},{out['k2']}"
+        log.info(f"{msg}")
         return out
 
 
@@ -132,4 +141,4 @@ if __name__ == '__main__':
     tsh = [(ThresholdsOperator.MAX, Decimal('0.5') - epsilon_0), None,
            (ThresholdsOperator.MIN, Decimal('0.5') + epsilon_1)]
 
-    attack.attack(tsh)
+    print(attack.attack(tsh))

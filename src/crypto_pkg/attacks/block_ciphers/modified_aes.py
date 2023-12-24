@@ -6,11 +6,9 @@ import random
 
 from crypto_pkg.attacks.block_ciphers.utils import prepare_key
 from crypto_pkg.ciphers.symmetric.aes import CustomAES, array_to_matrix, get_array_from_state
+from crypto_pkg.utils.logging import set_level, get_logger
 
-logging.basicConfig(level=logging.CRITICAL)
-
-_log = getLogger(__name__)
-_log.setLevel(logging.CRITICAL)
+log = get_logger(__name__)
 
 
 class ModifiedAES(CustomAES):
@@ -47,12 +45,11 @@ class ModifiedAES(CustomAES):
             c = self.encrypt(key=k_block, plain_text=plain_text)
             c_by_block = [c[i * 4:i * 4 + 4] for i in range(len(c))]
             if c_by_block[section_n] == cipher_block_ref[section_n]:
-                _log.info(f"key guess for block {section_n}: {key.hex}")
+                log.info(f"key guess for block {section_n}: {key.hex}")
                 return key
 
-    def attack(self, plain_text: str, cipher_text: str, verbose: bool = False):
-        if verbose:
-            _log.setLevel(logging.DEBUG)
+    @set_level(logger=log)
+    def attack(self, plain_text: str, cipher_text: str, _verbose: bool = False):
         p_int_list = [int(item, 16) for item in [plain_text[i * 2:i * 2 + 2] for i in range(len(plain_text))] if
                       item != '']
         c_int_list = [int(item, 16) for item in [cipher_text[i * 2:i * 2 + 2] for i in range(len(cipher_text))] if
@@ -66,13 +63,13 @@ class ModifiedAES(CustomAES):
             [p_int_list, c_by_block_ref, 128, 3]
         )
 
-        _log.debug("Run attack on sub-blocks in parallel")
+        log.debug("Run attack on sub-blocks in parallel")
         with Pool() as pool:
             res = pool.starmap(self.attack_section, args)
         r = [int(item.hex, 16) for item in res]
-        _log.debug(f"Parallel execution terminated with keys guesses {r}")
+        log.debug(f"Parallel execution terminated with keys guesses {r}")
         out = r[0] ^ r[1] ^ r[2] ^ r[3]
-        _log.info(f"128bits key guess: {out}")
+        log.info(f"128bits key guess: {out}")
         return out
 
 
@@ -93,7 +90,7 @@ if __name__ == '__main__':
     ct = bytes(c).hex()
 
     # ---- Run the attack
-    _log.debug(f"Run the attack with plain-text {p} and cipher-text {p}")
+    log.debug(f"Run the attack with plain-text {p} and cipher-text {p}")
     aes = ModifiedAES()
     result = aes.attack(plain_text=pt, cipher_text=ct, verbose=True)
     assert result == int(to_find_key, 16)

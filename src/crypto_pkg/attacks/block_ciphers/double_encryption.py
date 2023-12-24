@@ -1,10 +1,12 @@
 import random
-import sys
 from typing import Dict, Tuple, Union
 
 from Crypto.Cipher import AES
 
 from crypto_pkg.attacks.block_ciphers.utils import Text, prepare_key
+from crypto_pkg.utils.logging import get_logger, set_level
+
+log = get_logger(__name__)
 
 
 class DoubleAESAttack:
@@ -23,25 +25,33 @@ class DoubleAESAttack:
 
     @classmethod
     def lookup_table_computation(cls, plain_text: str, max_key: int = 24) -> Dict[int, int]:
+        log.info(f"Compute lookup table for plaintext {plain_text}")
         p = Text(text=bytes.fromhex(plain_text))
+        log.debug("Starting lookup table computation")
         out = {cls.encrypt(key=prepare_key(key=i, max_key=max_key), plain_text=p).integer: i for i in
                range(1, 2 ** max_key)}
+        log.debug("Lookup table computation completed")
         return out
 
     @classmethod
     def search_match(cls, cipher_text: str, lookup_table: Dict[int, int]) -> Union[Tuple[Text, Text], None]:
+        log.info(f"Search match for ciphertext {cipher_text}")
         c = Text(text=bytes.fromhex(cipher_text))
-
         for i in range(2 ** 24):
             key = prepare_key(i)
             m = cls.decrypt(key=key, cipher_text=c)
             if lookup_table.get(m.integer):
+                log.debug(f"Match found for key {key}")
                 return prepare_key(lookup_table.get(m.integer)), key
 
     @classmethod
-    def attack(cls, plain_text: str, cipher_text: str, max_key: int = 24):
+    @set_level(logger=log)
+    def attack(cls, plain_text: str, cipher_text: str, max_key: int = 24, _verbose: bool = False):
+        log.info(f"Constructing encryption lookup table for plain text {plain_text} ans maximum key size {max_key}")
         look_up_table = cls.lookup_table_computation(plain_text=plain_text, max_key=max_key)
+        log.info("Search encryption match in lookup table")
         keys = cls.search_match(cipher_text=cipher_text, lookup_table=look_up_table)
+        log.debug(f"Key Found")
         return keys
 
 

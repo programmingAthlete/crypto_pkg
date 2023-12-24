@@ -1,10 +1,6 @@
-import multiprocessing
 import os
-import pickle
-import time
 from decimal import Decimal
 import random
-from multiprocessing import Pool
 from typing import Optional
 
 import typer
@@ -17,7 +13,6 @@ from crypto_pkg.attacks.power_analysis.correlation_power_analysis import Attack 
 from crypto_pkg.attacks.stream_ciphers.geffe_cipher import Attack as GeffeAttack, ThresholdsOperator
 from crypto_pkg.contracts.cli_dto import ModifiedAESIn
 from importlib import resources
-import io
 
 app = typer.Typer(pretty_exceptions_show_locals=False, no_args_is_help=True)
 
@@ -27,7 +22,9 @@ def get_hex(x):
 
 
 @app.command('geffe')
-def attack_geffe():
+def attack_geffe(
+        verbose: bool = typer.Option(False, help="Show debug logs")
+):
     """
     Example on how to use the attack on a Geffe stream cipher.\n
     The function doesn't tae any argument, the stream of the cipher is hardcoded together with the LSFRs
@@ -37,7 +34,6 @@ def attack_geffe():
     stream = '01001110000011101100011101010111011100000011010001111001101101100000000111110110111011011001010111101100111001111100001111100101110000000010110101001111110110010001111101010110011010010110101011000101'
     # Geffe tabs
     taps = [[0, 1, 4, 7], [0, 1, 7, 11], [0, 2, 3, 5]]
-    stream_l = [int(item) for item in stream]
     attack = GeffeAttack(all_taps=taps, stream_ref=stream, f=[1, 1, 0, 1, 0, 0, 0, 1], max_clock=200, n=16)
 
     epsilon_0 = Decimal('0.25')
@@ -45,7 +41,7 @@ def attack_geffe():
     tsh = [(ThresholdsOperator.MAX, Decimal('0.5') - epsilon_0), None,
            (ThresholdsOperator.MIN, Decimal('0.5') + epsilon_1)]
 
-    attack.attack(tsh)
+    attack.attack(thresholds=tsh, _verbose=verbose)
 
 
 @app.command("modifiedAES")
@@ -99,7 +95,7 @@ def attack_modifier_aes(
     # ---- Run the attack
     print(f"Run the attack with plain-text {p} and cipher-text {p}")
     aes = ModifiedAES()
-    result = aes.attack(plain_text=model.plain_text, cipher_text=ct, verbose=verbose)
+    result = aes.attack(plain_text=model.plain_text, cipher_text=ct, _verbose=verbose)
     if model.key is not None:
         # Check that the key is the one provided
         assert result == int(model.key, 16)
@@ -125,6 +121,7 @@ def attack_modifier_aes(
 def attack_double_encryption(
         plain_text: Optional[str] = typer.Option(None, help="128bits plain text to encrypt"),
         cipher_text: Optional[str] = typer.Option(None, help="128bits encryption of the plain_text"),
+        verbose: Optional[bool] = typer.Option(False, help="Show debug logs"),
 ):
     """
     Example on how to use the double encryption attack on AES.\n
@@ -164,7 +161,7 @@ def attack_double_encryption(
 
     print("\nStating the attack")
     print("It might take a bit, but don't worry we'll find it")
-    ks = DoubleAESAttack.attack(plain_text=pt, cipher_text=ct, max_key=24)
+    ks = DoubleAESAttack.attack(plain_text=pt, cipher_text=ct, max_key=24, _verbose=verbose)
     if ks:
         print("\nKeys found:")
         print(f"\tk1: 0x{ks[0].hex}")
@@ -176,7 +173,8 @@ def attack_correlation_power_analysis(
         filename: str = typer.Argument('test_file.pickle',
                                        help="Filename of the pickle file with the measurements"),
         max_datapoints: Optional[int] = typer.Option(400, help="Maximum number of data points to consider"),
-        byte_position: Optional[int] = typer.Option(None, help="Byte position to attack")
+        byte_position: Optional[int] = typer.Option(None, help="Byte position to attack"),
+        verbose: Optional[bool] = typer.Option(None, help="Show debug logs")
 ):
     """
     Example on how to use the power correlation attack.\n
@@ -199,11 +197,11 @@ def attack_correlation_power_analysis(
     if byte_position is not None:
         key_byte = attack.attack_byte(byte_position=byte_position, plot=False,
                                       store=False,
-                                      re_calculate=True)
+                                      re_calculate=True, _verbose=verbose)
         print(f"Key byte found: {hex(key_byte[1])[2:]}")
-        return
-    key = attack.attack_full_key(store_correlation_matrices=False, re_calculate_correlation_matrices=False,
-                                 show_plot_correlations=False, verbose=True)
-    print("Key Found")
-    print(key)
+    else:
+        key = attack.attack_full_key(store_correlation_matrices=False, re_calculate_correlation_matrices=False,
+                                     show_plot_correlations=False, _verbose=verbose)
+        print("Key Found")
+        print(key)
     os.remove(filename)

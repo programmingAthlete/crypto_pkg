@@ -144,8 +144,9 @@ class Attack:
             np.save(f"matrices/matrix_{byte_position}.npy", np.array(c))
         return c
 
+
     def attack_byte(self, byte_position: int = 0, plot: bool = False,
-                    store: bool = True, re_calculate: bool = False) -> Tuple[int, np.ndarray]:
+                    store: bool = True, re_calculate: bool = False, _verbose: bool = False) -> Tuple[int, np.ndarray]:
         """
         Correlation attack of one byte
 
@@ -154,6 +155,7 @@ class Attack:
             plot: show the correlation plot 'byte_position' or not - default = False
             store: save the correlation matrices for the byte 'byte_position' or not - default = True
             re_calculate: re-calculate the correlation matrix for the byte 'byte_position' even it has been stored
+            _verbose:
         Returns:
             Tuple(byte_position, key byte)
         """
@@ -180,7 +182,7 @@ class Attack:
 
     @set_level(logger=log)
     def attack_full_key(self, show_plot_correlations: bool = False, store_correlation_matrices: bool = False,
-                        re_calculate_correlation_matrices: bool = True, verbose: bool = False):
+                        re_calculate_correlation_matrices: bool = True, _verbose: bool = False):
         cores = multiprocessing.cpu_count()
         log.info(f"Number of cores: {cores}. The program wil run in chunks of {cores} byte positions\n")
 
