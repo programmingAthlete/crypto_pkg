@@ -144,7 +144,6 @@ class Attack:
             np.save(f"matrices/matrix_{byte_position}.npy", np.array(c))
         return c
 
-
     def attack_byte(self, byte_position: int = 0, plot: bool = False,
                     store: bool = True, re_calculate: bool = False, _verbose: bool = False) -> Tuple[int, np.ndarray]:
         """
@@ -202,7 +201,7 @@ class Attack:
         log.info(
             f"All processes finished. Final output: {results}. Execution time: {tf - ti} seconds -"
             f" {(tf - ti) / 60} minutes")
-        log.debug(f"Constructing the final key from the output")
+        log.debug("Constructing the final key from the output")
         out = [(pos, hex(item)[2:]) for (pos, item) in results]
         sorted_list = sorted(out, key=lambda x: x[0])
         key_list = [item[1] for item in sorted_list][::-1]

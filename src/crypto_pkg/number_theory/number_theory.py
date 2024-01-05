@@ -73,7 +73,7 @@ class NumberTheory:
         """
         Chinese reminder from a list of integers as and list of modulus ns.
         we want to have z such that z = a_i (mod n_i), we hence compute it as
-        z = \sum_i^{len(a)} ( \prod_{j \neq i} (n_j * m_j * a_i) )
+        z = sum_i^{len(a)} ( prod_{j neq i} (n_j * m_j * a_i) )
 
         :param a: list of integers as
         :param n: list of modulus ns

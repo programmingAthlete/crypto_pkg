@@ -8,5 +8,3 @@ class PrimeNotGeneratedException(Exception):
 
 class KValueException(Exception):
     """ Raised when k is not an even number"""
-
-

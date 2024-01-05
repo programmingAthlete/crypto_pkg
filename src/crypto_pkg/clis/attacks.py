@@ -31,7 +31,8 @@ def attack_geffe(
     settings
      """
     # Choose Geffe output
-    stream = '01001110000011101100011101010111011100000011010001111001101101100000000111110110111011011001010111101100111001111100001111100101110000000010110101001111110110010001111101010110011010010110101011000101'
+    stream = '0100111000001110110001110101011101110000001101000111100110110110000000011111011011101101100101011110' \
+             '1100111001111100001111100101110000000010110101001111110110010001111101010110011010010110101011000101'
     # Geffe tabs
     taps = [[0, 1, 4, 7], [0, 1, 7, 11], [0, 2, 3, 5]]
     attack = GeffeAttack(all_taps=taps, stream_ref=stream, f=[1, 1, 0, 1, 0, 0, 0, 1], max_clock=200, n=16)
@@ -178,8 +179,8 @@ def attack_correlation_power_analysis(
 ):
     """
     Example on how to use the power correlation attack.\n
-    The filename of the measurement file is required. This file mush be a valid pickle file with at leas 'max_datapoints'
-     datapoints\n
+    The filename of the measurement file is required. This file mush be a valid pickle file with at leas
+     'max_datapoints' datapoints
     If a byte position is provided, only the provided key byte will be attacked, otherwise the whole key will be.
     """
     with resources.open_binary('crypto_pkg.attacks.power_analysis', 'test_file.pickle') as file:

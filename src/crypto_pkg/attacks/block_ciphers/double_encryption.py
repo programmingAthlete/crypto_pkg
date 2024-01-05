@@ -51,7 +51,7 @@ class DoubleAESAttack:
         look_up_table = cls.lookup_table_computation(plain_text=plain_text, max_key=max_key)
         log.info("Search encryption match in lookup table")
         keys = cls.search_match(cipher_text=cipher_text, lookup_table=look_up_table)
-        log.debug(f"Key Found")
+        log.debug("Key Found")
         return keys
 
 
