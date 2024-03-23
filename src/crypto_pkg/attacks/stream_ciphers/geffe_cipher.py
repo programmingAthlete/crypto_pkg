@@ -88,7 +88,7 @@ class Attack:
 
     def look_for_correlation(self, thresholds: Union[List[Tuple[ThresholdsOperator, float]], None]):
 
-        g = Geffe(self.n, self.all_taps, [1, 1, 0, 1, 0, 0, 0, 1])
+        g = Geffe(self.n, self.all_taps, self.f)
         d = [self.try_guess(g=g, threshold=thresholds, guess=i) for i in range(self.max_iter)]
         key0 = [item[0][0] for item in d if item[0] is not None]
         key2 = [item[2][0] for item in d if item[2] is not None]
