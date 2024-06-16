@@ -60,22 +60,15 @@ class Attack:
         return Decimal(sum(match)) / Decimal(len(a1))
 
     def try_guess(self, g, guess, threshold):
-        g.set_state([
-            guess,
-            0b1010010111010010,
-            guess,
-        ])
-        resp = {0: None, 2: None}
-        stream_0 = [g.L[0].clock() for _ in range(self.max_clock)]
-        match = self.check_match(a1=self.stream_ref_l, a2=stream_0)
-        checked_match0 = threshold[0][0](a=match, threshold=threshold[0][1])
-        if checked_match0:
-            resp[0] = (guess, match)
-        stream_2 = [g.L[2].clock() for _ in range(200)]
-        match = self.check_match(a1=self.stream_ref_l, a2=stream_2)
-        checked_match2 = threshold[2][0](a=match, threshold=threshold[2][1])
-        if checked_match2:
-            resp[2] = (guess, match)
+        init_state = [guess if v is not None else 0b1010010111010010 for v in threshold]
+        g.set_state(init_state)
+        resp = {i: None for i, v in enumerate(threshold) if v is not None}
+        for k in resp:
+            stream_k = [g.L[k].clock() for _ in range(self.max_clock)]
+            match = self.check_match(a1=self.stream_ref_l, a2=stream_k)
+            checked_match0 = threshold[k][0](a=match, threshold=threshold[k][1])
+            if checked_match0:
+                resp[k] = (guess, match)
         return resp
 
     def try_guess_for_1(self, g, guess):
@@ -89,16 +82,36 @@ class Attack:
     def look_for_correlation(self, thresholds: Union[List[Tuple[ThresholdsOperator, float]], None]):
 
         g = Geffe(self.n, self.all_taps, self.f)
-        d = [self.try_guess(g=g, threshold=thresholds, guess=i) for i in range(self.max_iter)]
+        d = list(filter(lambda data: not all(data.get(k) is None for k in data),
+                        [self.try_guess(g=g, threshold=thresholds, guess=i) for i in range(self.max_iter)]))
+        print(d)
+        merged_dict = {key: value[0] for da in d for key, value in da.items() if value is not None}
+        transformed_dict = {key: [item[key][0] for item in d if item[key] is not None] for key in d[0]}
+        print(merged_dict)
         key0 = [item[0][0] for item in d if item[0] is not None]
         key2 = [item[2][0] for item in d if item[2] is not None]
 
-        return key0, key2
+        return transformed_dict
 
-    def find_k1(self, key0, key2) -> Dict[str, list]:
+    @staticmethod
+    def reorder_sublist(sublist, key_dict):
+        ordered_sublist = [None] * len(sublist)
+        for key, values in key_dict.items():
+            if len(values) == 1:  # This key has only one value
+                ordered_sublist[key] = values[0]
+            else:
+                for value in values:
+                    if value not in sublist:
+                        ordered_sublist[key] = value
+                        break
+        return ordered_sublist
+
+    def find_missing(self, found_keys) -> Dict[str, list]:
         g = Geffe(self.n, self.all_taps, self.f)
-        all_keys = [[k0_item, k1, k2_item] for k0_item in key0 for k1 in range(self.max_iter) for k2_item in
-                    key2]
+        all_keys = [[k0_item, k1, k2_item] for k0_item in found_keys.get(0) for k1 in range(self.max_iter) for k2_item
+                    in
+                    found_keys.get(2)]
+        all_keys = [self.reorder_sublist(sublist, found_keys) for sublist in all_keys]
         res = [self.try_guess_for_1(guess=key, g=g) for key in
                all_keys]
         success = [item[1] for item in res if item[0] is True]
@@ -114,13 +127,15 @@ class Attack:
     @set_level(log)
     def attack(self, thresholds, _verbose: bool = False):
         log.info("Search for possible seeds")
-        k0, k2 = self.look_for_correlation(thresholds=thresholds)
+        ks = self.look_for_correlation(thresholds=thresholds)
         log.info("Possible choices for seeds of LFSR 1 and 3")
-        msg = f"Possible choices\n\tk_0 = {k0} = {[int_2_base_2(item, 16) for item in k0]}\n" \
-              f"\tk_2 = {k2} = {[int_2_base_2(item, 16) for item in k2]}"
+        msg_concat = "\n\t".join(
+            [f"k_{item} = {ks[item]} = {[int_2_base_2(subitem, 16) for subitem in ks[item]]}" for item in ks]) + "\n"
+        msg = f"Possible choices\n\t{msg_concat}"
         log.debug(msg)
+        breakpoint()
         log.info("Find seed for LFSR 2")
-        out = self.find_k1(key0=k0, key2=k2)
+        out = self.find_missing(found_keys=ks)
         msg = f"\nSuccess\nThe key is (k0,k1,k2)\n\t = {out['k0']},{out['k1']},{out['k2']}"
         log.info(f"{msg}")
         return out
